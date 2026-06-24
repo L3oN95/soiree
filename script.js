@@ -18,10 +18,34 @@ const CONFIG = {
   kisscamPhoto: "Bilder/Kisscam.jpeg",  // Kiss-Cam-Foto nach erfolgreicher Mission
   finalPhoto:  "charakter/Bild%20Final.jpeg", // euer Bild – formatfüllender Hintergrund auf der Finale-Seite
   finalFlyer:  "Bilder/Sommernachtskino.jpg", // Event-Flyer unter der Eintrittskarte
+
+  // ── Geheime Benachrichtigung (ntfy.sh) ──
+  // Du bekommst eine Push-Nachricht, sobald sie "Oui" tippt (und wenn sie das Finale erreicht).
+  // Das Topic ist dein privater Kanal – behandle es wie ein Passwort. Zum Empfangen:
+  //   • ntfy-App (iOS/Android) installieren → Topic unten abonnieren, ODER
+  //   • im Browser https://ntfy.sh/<TOPIC> öffnen (geheime Feed-Seite).
+  notifyTopic: "mon-soiree-k7p2x9aq4m",
 };
 
 // Reihenfolge der Missionen, die je eine Tresor-Ziffer verraten (1 Ziffer pro Eintrag, von links nach rechts)
 const MISSION_DIGITS = ["screen-pairs", "screen-game", "screen-quiz", "screen-catch", "screen-kisscam"];
+
+/* Geheime Push-Benachrichtigung an dich über ntfy.sh.
+   Läuft im Hintergrund und stört das Erlebnis nie (Fehler werden verschluckt).
+   Jedes Ereignis wird nur einmal gesendet. */
+const _notified = new Set();
+function notify(message, { title = "Soirée 🎬", tags = "heart", once = null } = {}) {
+  if (once) { if (_notified.has(once)) return; _notified.add(once); }
+  if (!CONFIG.notifyTopic) return;
+  try {
+    fetch("https://ntfy.sh/" + CONFIG.notifyTopic, {
+      method: "POST",
+      body: message,
+      headers: { "Title": title, "Tags": tags, "Priority": "high" },
+      keepalive: true,        // Nachricht geht auch raus, wenn die Seite gleich wechselt
+    }).catch(() => {});
+  } catch (e) {}
+}
 
 /* ────────────────────────────────────────────────────────────
    Kleine Helfer
@@ -389,7 +413,11 @@ noBtn.addEventListener("pointerdown", (e) => {
 });
 noBtn.addEventListener("click", (e) => e.preventDefault());
 
-$("#yesBtn").addEventListener("click", () => { Sound.click(); FX.heartsAt(window.innerWidth / 2, window.innerHeight / 2, 16); goTo("screen-chat"); });
+$("#yesBtn").addEventListener("click", () => {
+  Sound.click(); FX.heartsAt(window.innerWidth / 2, window.innerHeight / 2, 16);
+  notify("Elle a dit OUI ❤️ — sie hat auf die Frage geantwortet!", { title: "Sie hat JA gesagt 💍", tags: "tada,heart", once: "oui" });
+  goTo("screen-chat");
+});
 
 /* ============================================================
    KAPITEL 3 — Chatfenster
@@ -1696,6 +1724,8 @@ function endFinaleVideo() {
 onEnter["screen-final"] = () => {
   if (entered.has("final-played")) return;
   entered.add("final-played");
+
+  notify("Elle a tout réussi 🏆 — sie hat das Finale erreicht & das Ticket gesehen!", { title: "Mission erfüllt 🎬❤️", tags: "trophy,sparkles", once: "finale" });
 
   // Euer Bild als formatfüllender Hintergrund
   const bg = $("#finalBg");
