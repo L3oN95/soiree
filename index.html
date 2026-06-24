@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#1a0e1f" />
+<title>Une petite mission pour toi ❤️</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>❤️</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css?v=8" />
+</head>
+<body>
+
+<!-- Full-screen particle / confetti overlay -->
+<canvas id="fx"></canvas>
+
+<!-- Achievement toasts -->
+<div id="achievements" aria-live="polite"></div>
+
+<!-- Music toggle -->
+<button id="musicBtn" class="music-btn" title="Musique on/off" aria-label="Musique on/off">
+  <span class="music-icon">♪</span>
+</button>
+
+<main id="app">
+
+  <!-- ░░░ KAPITEL 1 — Einstieg ░░░ -->
+  <section class="screen active screen-intro" id="screen-intro">
+    <div class="intro-glow" id="introGlow" aria-hidden="true"></div>
+    <div class="intro-inner">
+      <p class="type-line" id="introLine1"></p>
+      <p class="type-line" id="introLine2"></p>
+      <button class="btn btn-primary fade-up" id="startBtn" hidden>Allons-y ! 😊</button>
+    </div>
+  </section>
+
+  <!-- ░░░ KAPITEL 2 — Die wichtige Frage ░░░ -->
+  <section class="screen screen-question" id="screen-question">
+    <div class="card question-card">
+      <h1 class="question-title">Que dirais-tu d’une soirée en plein air, avec un repas, du bon vin et plus encore… ?</h1>
+      <div class="question-actions">
+        <button class="btn btn-primary" id="yesBtn">Oui ❤️</button>
+        <button class="btn btn-primary" id="noBtn">Non</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░░ KAPITEL 3 — Nachrichten (nur Sprechblasen) ░░░ -->
+  <section class="screen screen-chat" id="screen-chat">
+    <div class="chat-wrap">
+      <div class="chat-stream" id="chatBody"></div>
+      <div class="chat-safe" id="chatSafe" hidden>
+        <div class="safe" aria-hidden="true">
+          <span class="safe-bolt b1"></span><span class="safe-bolt b2"></span>
+          <span class="safe-bolt b3"></span><span class="safe-bolt b4"></span>
+          <div class="safe-dial"></div>
+          <div class="safe-handle"></div>
+        </div>
+        <span class="safe-label">🔒 Ton ticket est bien verrouillé…</span>
+      </div>
+      <button class="btn btn-primary btn-sm" id="chatNextBtn" hidden>Suivant →</button>
+    </div>
+  </section>
+
+  <!-- ░░░ Zwischenspiel — Erinnerungen fliegen wie ein Kartendeck vorbei ░░░ -->
+  <section class="screen screen-fly" id="screen-fly">
+    <div class="fly-stage" id="flyStage">
+      <p class="fly-title" id="flyTitle">Nos moments ✨</p>
+    </div>
+  </section>
+
+  <!-- ░░░ KAPITEL 4b — Foto-Memory (Pärchen finden) ░░░ -->
+  <section class="screen screen-pairs" id="screen-pairs">
+    <div class="pairs-wrap">
+      <div class="pairs-head">
+        <span class="kicker">Mission 01</span>
+        <h2 class="section-title">Tu t’en souviens ?</h2>
+        <p class="section-sub">Trouve les paires qui vont ensemble ❤️</p>
+      </div>
+      <div class="memory-grid" id="memoryGrid"></div>
+      <div class="pairs-foot" id="pairsFoot" hidden>
+        <p class="win-text">Toutes les paires trouvées ! ✨</p>
+        <button class="btn btn-primary" id="pairsNextBtn">Mission suivante →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░░ KAPITEL 5 — Taschenlampen-Labyrinth ░░░ -->
+  <section class="screen screen-game" id="screen-game">
+    <div class="game-head">
+      <span class="kicker">Mission 02</span>
+      <h2 class="section-title">La petite chasse au trésor</h2>
+      <div class="char-select" id="charSelect">
+        <span class="char-select-label">Qui cherche ?</span>
+        <button class="char-opt active" data-char="alexia"><img src="charakter/alexia_clean_face.png" alt="" /><span>Alexia</span></button>
+        <button class="char-opt" data-char="leon"><img src="charakter/leon_clean_face.png" alt="" /><span>Leon</span></button>
+      </div>
+      <div class="collect-bar" id="collectBar">
+        <span class="slot" data-item="heart">❤️</span>
+        <span class="slot" data-item="cocktail">🍹</span>
+        <span class="slot" data-item="ticket">✈️</span>
+        <span class="found-count" id="foundCount">0 / 3 trouvés</span>
+      </div>
+    </div>
+    <div class="game-stage">
+      <canvas id="maze"></canvas>
+      <div class="game-toast" id="gameToast"></div>
+      <div class="game-hint" id="gameHint" hidden></div>
+      <div class="game-win" id="gameWin" hidden>
+        <p class="win-text">Réussi ! ✨</p>
+        <button class="btn btn-primary" id="gameNextBtn">Mission suivante →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░░ KAPITEL 6 — Mini-Quiz ░░░ -->
+  <section class="screen screen-quiz" id="screen-quiz">
+    <div class="card quiz-card">
+      <span class="kicker">Mission 03</span>
+      <div class="quiz-progress" id="quizProgress"></div>
+      <h2 class="quiz-question" id="quizQuestion"></h2>
+      <div class="quiz-options" id="quizOptions"></div>
+      <p class="quiz-reaction" id="quizReaction" hidden></p>
+      <button class="btn btn-primary" id="quizNextBtn" hidden>Suivant →</button>
+    </div>
+  </section>
+
+  <!-- ░░░ KAPITEL 6b — Herzen fangen ░░░ -->
+  <section class="screen screen-catch" id="screen-catch">
+    <div class="catch-head">
+      <span class="kicker">Mission 04</span>
+      <h2 class="section-title">Attrape les cœurs</h2>
+      <div class="collect-bar">
+        <span class="found-count" id="catchCount">0 / 12</span>
+      </div>
+      <p class="section-sub">Déplace le panier avec la souris ou le doigt 💛 — mais attention aux 💣 !</p>
+    </div>
+    <div class="catch-stage">
+      <canvas id="catchCanvas"></canvas>
+      <div class="catch-countdown" id="catchCountdown" hidden></div>
+      <div class="game-win" id="catchWin" hidden>
+        <p class="win-text">Tous attrapés ! ✨</p>
+        <button class="btn btn-primary" id="catchNextBtn">Mission suivante →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░░ KAPITEL 6c — Kiss-Cam (uns in der Menge finden) ░░░ -->
+  <section class="screen screen-kisscam" id="screen-kisscam">
+    <div class="kisscam-head">
+      <span class="kicker">Mission 05</span>
+      <h2 class="section-title">La Kiss-Cam</h2>
+      <p class="section-sub">Tu es le caméraman 🎥 — trouve-nous dans la foule et fais la mise au point !</p>
+    </div>
+    <div class="kisscam-stage">
+      <canvas id="kisscam"></canvas>
+      <div class="game-hint" id="kisscamHint" hidden></div>
+      <div class="game-win" id="kisscamWin" hidden>
+        <div class="kisscam-shot">
+          <span class="kc-banner">❤ KISS CAM ❤</span>
+          <img id="kisscamPhoto" alt="Nous à la Kiss-Cam" />
+        </div>
+        <p class="win-text">Trouvés ! 📸❤️</p>
+        <button class="btn btn-primary" id="kisscamNextBtn">Mission suivante →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░░ KAPITEL 7 — Der Tresor ░░░ -->
+  <section class="screen screen-vault" id="screen-vault">
+    <div class="card vault-card">
+      <span class="kicker">Mission finale</span>
+      <h2 class="section-title">Presque fini</h2>
+      <p class="section-sub">Mais la surprise est encore sous clé.</p>
+
+      <div class="vault">
+        <div class="vault-door" id="vaultDoor">
+          <div class="vault-dial"></div>
+          <div class="vault-handle"></div>
+        </div>
+        <div class="ticket vault-ticket" id="vaultTicket" hidden></div>
+      </div>
+
+      <div class="code-display" id="codeDisplay">
+        <span class="digit">_</span><span class="digit">_</span><span class="digit">_</span><span class="digit">_</span><span class="digit">_</span>
+      </div>
+
+      <div class="keypad" id="keypad">
+        <button class="key" data-key="1">1</button>
+        <button class="key" data-key="2">2</button>
+        <button class="key" data-key="3">3</button>
+        <button class="key" data-key="4">4</button>
+        <button class="key" data-key="5">5</button>
+        <button class="key" data-key="6">6</button>
+        <button class="key" data-key="7">7</button>
+        <button class="key" data-key="8">8</button>
+        <button class="key" data-key="9">9</button>
+        <button class="key key-clear" data-key="clear">⌫</button>
+        <button class="key" data-key="0">0</button>
+        <button class="key key-ok" data-key="ok">OK</button>
+      </div>
+
+      <ul class="vault-hints">
+        <li>Saisis les 5 chiffres que tu as gagnés dans les missions.</li>
+        <li>De la première à la dernière mission – exactement dans cet ordre.</li>
+      </ul>
+
+      <button class="btn btn-ghost btn-sm" id="vaultHelpBtn">J’ai besoin d’aide</button>
+    </div>
+  </section>
+
+  <!-- ░░░ KAPITEL 8 — Finale Enthüllung ░░░ -->
+  <section class="screen screen-final" id="screen-final">
+    <!-- Euer Bild als formatfüllender Hintergrund (Pfad in CONFIG.finalPhoto) -->
+    <img class="final-bg" id="finalBg" alt="Nous deux" />
+    <div class="final-card" id="finalCard" hidden>
+      <p class="final-congrats">Félicitations ❤️</p>
+      <div class="ticket" id="finalTicket"></div>
+      <img class="final-flyer" id="finalFlyer" alt="Sommernachtskino 2026 · 26 + 27 juin chez Gerhart's Strauße" />
+      <button class="btn btn-ghost btn-sm" id="replayBtn">Recommencer</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- Kino-Sequenz: Video nach dem Öffnen des Tresors -->
+<div class="cinema" id="videoCinema" hidden>
+  <div class="cinema-frame">
+    <video id="finaleVideo" class="cinema-video" playsinline preload="auto" src="video/finale.mp4"></video>
+    <button class="cinema-play" id="cinemaPlay" hidden aria-label="Lire la vidéo">
+      <span class="cinema-play-ic">▶</span>
+      <span class="cinema-play-lbl">Touche pour lancer la vidéo</span>
+    </button>
+  </div>
+  <button class="cinema-skip" id="cinemaSkip" hidden>Passer →</button>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" id="lightboxClose" aria-label="Fermer">×</button>
+  <figure class="lightbox-figure">
+    <img id="lightboxImg" alt="Souvenir" />
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
