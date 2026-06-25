@@ -41,11 +41,14 @@ function notify(message, { title = "Soirée 🎬", tags = "heart", once = null }
     fetch("https://ntfy.sh/" + CONFIG.notifyTopic, {
       method: "POST",
       body: message,
-      headers: { "Title": title, "Tags": tags, "Priority": "high" },
+      headers: { "Title": title, "Tags": tags, "Priority": "high", "Content-Type": "text/plain; charset=utf-8" },
       keepalive: true,        // Nachricht geht auch raus, wenn die Seite gleich wechselt
     }).catch(() => {});
   } catch (e) {}
 }
+
+/* Sofort beim Öffnen der Seite: „Sie schaut es sich gerade an." */
+notify("Elle vient d’ouvrir l’invitation 👀 — sie hat die Seite gerade geöffnet!", { title: "Sie schaut es sich an 💛", tags: "eyes", once: "opened" });
 
 /* ────────────────────────────────────────────────────────────
    Kleine Helfer
